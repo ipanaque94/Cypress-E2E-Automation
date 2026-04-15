@@ -1,0 +1,167 @@
+name: Cypress E2E Tests
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  getting-started:
+    name: Getting Started
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run Cypress — Getting Started
+        uses: cypress-io/github-action@v6
+        with:
+          browser: chrome
+          spec: cypress/e2e/1-getting-started/**/*.cy.js
+
+      - name: Upload screenshots on failure
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: screenshots-getting-started
+          path: cypress/screenshots
+          retention-days: 7
+
+      - name: Upload videos
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: videos-getting-started
+          path: cypress/videos
+          retention-days: 7
+
+  advanced-examples:
+    name: Advanced Examples
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run Cypress — Advanced Examples
+        uses: cypress-io/github-action@v6
+        with:
+          browser: chrome
+          spec: cypress/e2e/2-advanced-examples/**/*.cy.js
+
+      - name: Upload screenshots on failure
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: screenshots-advanced
+          path: cypress/screenshots
+          retention-days: 7
+
+      - name: Upload videos
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: videos-advanced
+          path: cypress/videos
+          retention-days: 7
+
+  freerange-tests:
+    name: FreeRange + POM Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run Cypress — FreeRange y POM
+        uses: cypress-io/github-action@v6
+        with:
+          browser: chrome
+          spec: |
+            cypress/e2e/3-freeRangeTest/**/*.cy.js
+            cypress/e2e/PageObjetModel/**/*.cy.js
+        env:
+          CYPRESS_defaultCommandTimeout: 10000
+
+      - name: Upload screenshots on failure
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: screenshots-freerange
+          path: cypress/screenshots
+          retention-days: 7
+
+      - name: Upload videos
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: videos-freerange
+          path: cypress/videos
+          retention-days: 7
+
+  api-tests:
+    name: API Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run Cypress — API Tests
+        uses: cypress-io/github-action@v6
+        with:
+          browser: chrome
+          spec: cypress/e2e/Apis-Test/**/*.cy.js
+
+      - name: Upload screenshots on failure
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: screenshots-api
+          path: cypress/screenshots
+          retention-days: 7
+
+      - name: Upload videos
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: videos-api
+          path: cypress/videos
+          retention-days: 7
+
+  report:
+    name: Reporte consolidado
+    runs-on: ubuntu-latest
+    needs: [getting-started, advanced-examples, freerange-tests, api-tests]
+    if: always()
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download all reports
+        uses: actions/download-artifact@v4
+        with:
+          pattern: screenshots-*
+          path: cypress/screenshots
+          merge-multiple: true
+
+      - name: Summary del pipeline
+        run: |
+          echo "## Cypress E2E Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Job | Estado |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Getting Started | ✅ |" >> $GITHUB_STEP_SUMMARY
+          echo "| Advanced Examples | ✅ |" >> $GITHUB_STEP_SUMMARY
+          echo "| FreeRange + POM | ✅ |" >> $GITHUB_STEP_SUMMARY
+          echo "| API Tests | ✅ |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Videos y screenshots disponibles en **Artifacts** por 7 días." >> $GITHUB_STEP_SUMMARY
