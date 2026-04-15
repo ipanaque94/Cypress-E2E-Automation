@@ -9,16 +9,19 @@ module.exports = defineConfig({
     experimentalSessionAndOrigin: true,
     experimentalSessionSupport: true,
     setupNodeEvents(on, config) {
+      allureCypress(on, config, {
+        resultsDir: "allure-results",
+      });
+
       on("task", {
         "db:reset": async (users) => {
           const reset = require(path.resolve(__dirname, "cypress/db/reset.js"));
           return await reset(users);
         },
         "api:authenticate": async ({ username, password }) => {
-          const { db, init } = require(path.resolve(
-            __dirname,
-            "cypress/db/connection.js"
-          ));
+          const { db, init } = require(
+            path.resolve(__dirname, "cypress/db/connection.js"),
+          );
           await init();
           return new Promise((resolve, reject) => {
             db.get(
@@ -41,7 +44,7 @@ module.exports = defineConfig({
                     body: { success: false, message: "Unauthorized" },
                   });
                 }
-              }
+              },
             );
           });
         },
