@@ -358,7 +358,7 @@ npx cypress run --spec "cypress/e2e/2-advanced-examples/**/*.cy.js"
 ## Autor
 
 **Enoc Ipanaque** — Lima, Perú
-QA Automation Engineer | Selenium · Playwright · Cypress · Rest Assured · AWS
+QA Automation Engineer (Junior)  Automatización UI y API con Selenium, Playwright, Cypress y Rest Assured.  Práctica en Jira, Zephyr y JMeter - Scrum.
 
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-Enoc_Ipanaque-0077B5?style=flat&logo=linkedin)](https://www.linkedin.com/in/enoc-isaac-ipanaque-rodas-b3729a283)
 [![GitHub](https://img.shields.io/badge/GitHub-ipanaque94-181717?style=flat&logo=github)](https://github.com/ipanaque94)
