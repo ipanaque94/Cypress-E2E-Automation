@@ -11,17 +11,15 @@ Suite de automatización E2E construida con Cypress y JavaScript. Cubre UI testi
 
 ## Por qué construí esto
 
-Cuando empecé a estudiar Cypress me di cuenta de que la mayoría de proyectos de práctica tienen 3 o 4 tests básicos contra una sola pantalla y sin ninguna organización real. Quería entender cómo trabaja un QA en una empresa de verdad — con múltiples tipos de prueba, datos externalizados en fixtures, patrones de diseño reutilizables y un pipeline que detecta regresiones automáticamente.
+Quería entender cómo trabaja un QA en una empresa de verdad — con múltiples tipos de prueba, datos externalizados en fixtures, patrones de diseño reutilizables y un pipeline que detecta regresiones automáticamente.
+Entoces empecé a estudiar el curso Cypress: E2E Automation Testing con JS, a fondo!
+en #Udemy. 
 
 El proceso no fue lineal. Estos son los problemas reales que resolví:
-
-**El contexto `this` en Cypress rompe los fixtures.** Mezclé arrow functions con `function()` en los hooks y `this.testdata` llegaba `undefined` al `it()`. La causa: el `before(() => {})` no preserva el contexto hacia el test. La solución fue cambiar a `beforeEach(function() {})` con sintaxis tradicional en todos los tests que leen fixtures.
 
 **Tests acoplados a sitios externos que cambian.** Varios tests probaban el sitio de Free Range Testers. Cuando actualizaron su menú y renombraron páginas, los tests fallaron sin tocar una sola línea de mi código. Eso me enseñó la diferencia entre un bug del producto y un test desactualizado por cambio de ambiente — y por qué los tests deben validar comportamiento general en lugar de texto exacto que puede cambiar.
 
 **`.catch()` no existe en el chain de Cypress.** Intenté encadenar `.catch()` directamente sobre `cy.wrap().then().then()` como haría con una Promise nativa. Cypress no expone ese método. La solución fue manejar el error dentro del `.then()` usando `cy.request({ failOnStatusCode: false })`.
-
-**Tests que dependen de servidor local no corren en CI.** El test de sesiones apuntaba a `localhost:3000`. En GitHub Actions ese servidor no existe. Lo reescribí usando `the-internet.herokuapp.com`, que es pública, estable y no requiere infraestructura propia.
 
 **Regex con unidades incorrectas.** El test de tablas dinámicas fallaba porque el regex `/\d+(\.\d+)? MB\/s/` no coincidía con el formato real de la tabla que devuelve `Mbps`. Un caracter de diferencia en la unidad tira el test completo.
 
