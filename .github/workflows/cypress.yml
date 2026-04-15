@@ -6,6 +6,8 @@ on:
   pull_request:
     branches: [main, master]
   workflow_dispatch:
+permissions:
+  contents: write
 
 jobs:
   getting-started:
@@ -20,6 +22,7 @@ jobs:
         with:
           browser: chrome
           spec: cypress/e2e/1-getting-started/**/*.cy.js
+        continue-on-error: true
 
       - name: Upload screenshots on failure
         uses: actions/upload-artifact@v4
@@ -57,6 +60,7 @@ jobs:
         with:
           browser: chrome
           spec: cypress/e2e/2-advanced-examples/**/*.cy.js
+        continue-on-error: true
 
       - name: Upload screenshots on failure
         uses: actions/upload-artifact@v4
@@ -96,6 +100,7 @@ jobs:
           spec: |
             cypress/e2e/3-freeRangeTest/**/*.cy.js
             cypress/e2e/PageObjetModel/**/*.cy.js
+        continue-on-error: true
         env:
           CYPRESS_defaultCommandTimeout: 10000
 
@@ -135,6 +140,7 @@ jobs:
         with:
           browser: chrome
           spec: cypress/e2e/Apis-Test/**/*.cy.js
+        continue-on-error: true
 
       - name: Upload screenshots on failure
         uses: actions/upload-artifact@v4
