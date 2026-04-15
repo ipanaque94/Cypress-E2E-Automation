@@ -1,13 +1,12 @@
 const { defineConfig } = require("cypress");
 const path = require("path");
+const { allureCypress } = require("allure-cypress/reporter");
 
 module.exports = defineConfig({
   video: true,
   e2e: {
     specPattern: "cypress/e2e/**/*.cy.{js,jsx,ts,tsx}",
     supportFile: "cypress/support/e2e.js",
-    experimentalSessionAndOrigin: true,
-    experimentalSessionSupport: true,
     setupNodeEvents(on, config) {
       allureCypress(on, config, {
         resultsDir: "allure-results",
