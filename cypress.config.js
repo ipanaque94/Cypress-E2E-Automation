@@ -51,5 +51,4 @@ module.exports = defineConfig({
     },
   },
   projectId: "6m8pac",
-  report: "mochawesome",
 });
