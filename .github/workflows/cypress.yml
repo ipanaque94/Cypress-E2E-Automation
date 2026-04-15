@@ -6,6 +6,7 @@ on:
   pull_request:
     branches: [main, master]
   workflow_dispatch:
+
 permissions:
   contents: write
 
@@ -200,7 +201,8 @@ jobs:
 
       - name: Generate Allure report
         run: |
-          npx allure generate allure-results --clean -o allure-report
+          mkdir -p allure-results
+          npx allure generate allure-results --clean -o allure-report || echo "Allure report generation failed"
           echo "## Cypress E2E + Allure Results" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "| Job | Estado |" >> $GITHUB_STEP_SUMMARY
