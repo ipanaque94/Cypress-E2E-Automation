@@ -1,0 +1,100 @@
+{
+  "stats": {
+    "suites": 1,
+    "tests": 1,
+    "passes": 1,
+    "pending": 0,
+    "failures": 0,
+    "start": "2026-01-05T19:57:31.628Z",
+    "end": "2026-01-05T19:57:36.328Z",
+    "duration": 4700,
+    "testsRegistered": 1,
+    "passPercent": 100,
+    "pendingPercent": 0,
+    "other": 0,
+    "hasOther": false,
+    "skipped": 0,
+    "hasSkipped": false
+  },
+  "results": [
+    {
+      "uuid": "454a9553-14ca-4b79-9198-548be4ea4904",
+      "title": "",
+      "fullFile": "cypress\\e2e\\Apis-Test\\Login.cy.js",
+      "file": "cypress\\e2e\\Apis-Test\\Login.cy.js",
+      "beforeHooks": [],
+      "afterHooks": [],
+      "tests": [],
+      "suites": [
+        {
+          "uuid": "eb82c88a-3d40-4e65-9bd3-33efda95d0d4",
+          "title": "Loquear-Basic Auth y Auth con Forms",
+          "fullFile": "",
+          "file": "",
+          "beforeHooks": [],
+          "afterHooks": [],
+          "tests": [
+            {
+              "title": "Realizo Login Usando Comando Personalizado",
+              "fullTitle": "Loquear-Basic Auth y Auth con Forms Realizo Login Usando Comando Personalizado",
+              "timedOut": null,
+              "duration": 1671,
+              "state": "passed",
+              "speed": "fast",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "cy.login();\ncy.get(\".subheader\").should(\"include.text\", \"Welcome to the Secure Area\");",
+              "err": {},
+              "uuid": "3c5679c1-c095-4878-9606-76e9f39451e3",
+              "parentUUID": "eb82c88a-3d40-4e65-9bd3-33efda95d0d4",
+              "isHook": false,
+              "skipped": false
+            }
+          ],
+          "suites": [],
+          "passes": [
+            "3c5679c1-c095-4878-9606-76e9f39451e3"
+          ],
+          "failures": [],
+          "pending": [],
+          "skipped": [],
+          "duration": 1671,
+          "root": false,
+          "rootEmpty": false,
+          "_timeout": 2000
+        }
+      ],
+      "passes": [],
+      "failures": [],
+      "pending": [],
+      "skipped": [],
+      "duration": 0,
+      "root": true,
+      "rootEmpty": true,
+      "_timeout": 2000
+    }
+  ],
+  "meta": {
+    "mocha": {
+      "version": "7.2.0"
+    },
+    "mochawesome": {
+      "options": {
+        "quiet": false,
+        "reportFilename": "mochawesome",
+        "saveHtml": true,
+        "saveJson": true,
+        "consoleReporter": "spec",
+        "useInlineDiffs": false,
+        "code": true
+      },
+      "version": "7.1.4"
+    },
+    "marge": {
+      "options": null,
+      "version": "6.3.2"
+    }
+  }
+}
