@@ -13,6 +13,10 @@ permissions:
   id-token: write
 
 jobs:
+  # ──────────────────────────────────────────────────────────────────────────
+  # SUITE JOBS
+  # ──────────────────────────────────────────────────────────────────────────
+
   getting-started:
     name: "Suite — Getting Started"
     runs-on: ubuntu-latest
@@ -27,8 +31,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Clean allure results
-        run: rm -rf allure-results allure-report
+      - name: Clean workspace
+        run: rm -rf allure-results allure-report cypress/screenshots cypress/videos
 
       - name: Run Cypress — Getting Started
         uses: cypress-io/github-action@v6
@@ -38,7 +42,9 @@ jobs:
           install: false
         continue-on-error: true
 
-      - uses: actions/upload-artifact@v4
+      # Subir SOLO los archivos de resultado de esta suite (sin carpeta history)
+      - name: Upload allure results
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: allure-results-getting-started
@@ -67,8 +73,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Clean allure results
-        run: rm -rf allure-results allure-report
+      - name: Clean workspace
+        run: rm -rf allure-results allure-report cypress/screenshots cypress/videos
 
       - name: Run Cypress — Advanced Examples
         uses: cypress-io/github-action@v6
@@ -78,7 +84,8 @@ jobs:
           install: false
         continue-on-error: true
 
-      - uses: actions/upload-artifact@v4
+      - name: Upload allure results
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: allure-results-advanced
@@ -107,8 +114,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Clean allure results
-        run: rm -rf allure-results allure-report
+      - name: Clean workspace
+        run: rm -rf allure-results allure-report cypress/screenshots cypress/videos
 
       - name: Run Cypress — FreeRange y POM
         uses: cypress-io/github-action@v6
@@ -122,7 +129,8 @@ jobs:
         env:
           CYPRESS_defaultCommandTimeout: "10000"
 
-      - uses: actions/upload-artifact@v4
+      - name: Upload allure results
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: allure-results-freerange
@@ -151,8 +159,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Clean allure results
-        run: rm -rf allure-results allure-report
+      - name: Clean workspace
+        run: rm -rf allure-results allure-report cypress/screenshots cypress/videos
 
       - name: Run Cypress — API Tests
         uses: cypress-io/github-action@v6
@@ -162,7 +170,8 @@ jobs:
           install: false
         continue-on-error: true
 
-      - uses: actions/upload-artifact@v4
+      - name: Upload allure results
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: allure-results-api
@@ -177,6 +186,10 @@ jobs:
           path: cypress/screenshots/
           retention-days: 7
 
+  # ──────────────────────────────────────────────────────────────────────────
+  # REPORT JOB
+  # ──────────────────────────────────────────────────────────────────────────
+
   allure-report:
     name: "Generar y publicar reporte Allure"
     runs-on: ubuntu-latest
@@ -185,6 +198,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # ── 1. Descargar resultados frescos de esta ejecución ─────────────────
       - name: Download all allure results
         uses: actions/download-artifact@v4
         with:
@@ -192,39 +206,58 @@ jobs:
           path: allure-results-raw
           merge-multiple: true
 
-      - name: Strip history from downloaded results
-        run: find allure-results-raw -type d -name history -exec rm -rf {} + 2>/dev/null || true
-
-      - name: Prepare clean allure-results folder
+      # ── 2. Crear carpeta de resultados SOLO con los JSONs de esta run ─────
+      #       Se excluye cualquier subcarpeta (history, attachments de runs
+      #       anteriores) que pudiera haber quedado embebida en los artefactos
+      - name: Build clean allure-results (current run only)
         run: |
           mkdir -p allure-results
-          cp -r allure-results-raw/. allure-results/
+          # Copiar únicamente los archivos en el primer nivel (los JSON/XML
+          # generados por el reporter de Cypress-Allure de esta ejecución)
+          find allure-results-raw -maxdepth 1 -type f \
+            \( -name "*.json" -o -name "*.xml" -o -name "*.png" -o -name "*.mp4" \) \
+            -exec cp {} allure-results/ \;
+          echo "── Resultados limpios ──"
+          ls -la allure-results/
 
+      # ── 3. Instalar Allure CLI ─────────────────────────────────────────────
       - name: Install Allure CLI
         run: |
-          curl -sLo allure.tgz https://github.com/allure-framework/allure2/releases/download/2.27.0/allure-2.27.0.tgz
+          curl -sLo allure.tgz \
+            https://github.com/allure-framework/allure2/releases/download/2.27.0/allure-2.27.0.tgz
           tar -zxf allure.tgz
           sudo mv allure-2.27.0 /opt/allure
           sudo ln -s /opt/allure/bin/allure /usr/local/bin/allure
 
-      - name: Restore Allure history from gh-pages
-        run: |
-          if git ls-remote --exit-code origin gh-pages; then
-            git fetch origin gh-pages --depth=1
-            mkdir -p allure-results/history
-            git checkout origin/gh-pages -- history 2>/dev/null \
-              && cp -r history/. allure-results/history/ \
-              || echo "No history found in gh-pages — first run"
-          else
-            echo "gh-pages branch does not exist yet — first run"
-          fi
+      # ── 4. Restaurar historial de tendencia (desde artefacto, NO gh-pages) ─
+      #       Usamos un artefacto dedicado "allure-history" que vive entre runs.
+      #       La primera vez no existe → Allure arranca sin historial (correcto).
+      - name: Restore Allure history from artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: allure-history
+          path: allure-results/history
+        continue-on-error: true # primera ejecución: no existe aún, se ignora
 
+      # ── 5. Generar reporte ─────────────────────────────────────────────────
       - name: Generate Allure report
         run: |
           allure generate allure-results --clean -o allure-report
           echo "── Report contents ──"
           ls -la allure-report/
 
+      # ── 6. Guardar el historial generado como artefacto para el próximo run ─
+      #       Este artefacto reemplaza al anterior (mismo nombre).
+      - name: Save Allure history for next run
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: allure-history
+          path: allure-report/history/
+          if-no-files-found: warn
+          retention-days: 30 # conserva tendencia por 30 días
+
+      # ── 7. Publicar en GitHub Pages ────────────────────────────────────────
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
@@ -233,10 +266,11 @@ jobs:
           publish_branch: gh-pages
           force_orphan: true
 
+      # ── 8. Resumen ─────────────────────────────────────────────────────────
       - name: Pipeline summary
         if: always()
         run: |
-          echo "## Cypress E2E — Allure Report" >> $GITHUB_STEP_SUMMARY
+          echo "## ✅ Cypress E2E — Allure Report" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "| Suite | Estado |" >> $GITHUB_STEP_SUMMARY
           echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
