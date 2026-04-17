@@ -39,7 +39,7 @@ describe("Home de www.freerangetesters.com", () => {
         cy.contains('button','Accede ya').click()
     }) */
 
-  it("Navega a suscripciones", () => {
-    cy.contains("a", "Suscripciones").click();
+  it("Navega a Experiencia real en QA", () => {
+    cy.contains("a", "Experiencia real en QA").click();
   });
 });
