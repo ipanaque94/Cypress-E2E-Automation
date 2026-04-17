@@ -13,10 +13,9 @@ permissions:
   id-token: write
 
 jobs:
-  # ──────────────────────────────────────────────────────────────────────────
-  # SUITE JOBS
-  # ──────────────────────────────────────────────────────────────────────────
-
+  # ═══════════════════════════════════════════════════════════
+  #  SUITE 1 — Getting Started
+  # ═══════════════════════════════════════════════════════════
   getting-started:
     name: "Suite — Getting Started"
     runs-on: ubuntu-latest
@@ -42,9 +41,7 @@ jobs:
           install: false
         continue-on-error: true
 
-      # Subir SOLO los archivos de resultado de esta suite (sin carpeta history)
-      - name: Upload allure results
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: allure-results-getting-started
@@ -59,6 +56,9 @@ jobs:
           path: cypress/screenshots/
           retention-days: 7
 
+  # ═══════════════════════════════════════════════════════════
+  #  SUITE 2 — Advanced Examples
+  # ═══════════════════════════════════════════════════════════
   advanced-examples:
     name: "Suite — Advanced Examples"
     runs-on: ubuntu-latest
@@ -84,8 +84,7 @@ jobs:
           install: false
         continue-on-error: true
 
-      - name: Upload allure results
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: allure-results-advanced
@@ -100,6 +99,9 @@ jobs:
           path: cypress/screenshots/
           retention-days: 7
 
+  # ═══════════════════════════════════════════════════════════
+  #  SUITE 3 — FreeRange + POM
+  # ═══════════════════════════════════════════════════════════
   freerange-pom:
     name: "Suite — FreeRange + POM"
     runs-on: ubuntu-latest
@@ -129,8 +131,7 @@ jobs:
         env:
           CYPRESS_defaultCommandTimeout: "10000"
 
-      - name: Upload allure results
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: allure-results-freerange
@@ -145,6 +146,9 @@ jobs:
           path: cypress/screenshots/
           retention-days: 7
 
+  # ═══════════════════════════════════════════════════════════
+  #  SUITE 4 — API Tests
+  # ═══════════════════════════════════════════════════════════
   api-tests:
     name: "Suite — API Tests"
     runs-on: ubuntu-latest
@@ -170,8 +174,7 @@ jobs:
           install: false
         continue-on-error: true
 
-      - name: Upload allure results
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: allure-results-api
@@ -186,10 +189,9 @@ jobs:
           path: cypress/screenshots/
           retention-days: 7
 
-  # ──────────────────────────────────────────────────────────────────────────
-  # REPORT JOB
-  # ──────────────────────────────────────────────────────────────────────────
-
+  # ═══════════════════════════════════════════════════════════
+  #  REPORT — Genera y publica reporte Allure
+  # ═══════════════════════════════════════════════════════════
   allure-report:
     name: "Generar y publicar reporte Allure"
     runs-on: ubuntu-latest
@@ -198,29 +200,46 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # ── 1. Descargar resultados frescos de esta ejecución ─────────────────
-      - name: Download all allure results
+      # ── 1. Descargar los 4 artefactos de resultados ──────────────────────
+      - name: Download allure-results-getting-started
         uses: actions/download-artifact@v4
         with:
-          pattern: allure-results-*
-          path: allure-results-raw
-          merge-multiple: true
+          name: allure-results-getting-started
+          path: allure-results
+        continue-on-error: true
 
-      # ── 2. Crear carpeta de resultados SOLO con los JSONs de esta run ─────
-      #       Se excluye cualquier subcarpeta (history, attachments de runs
-      #       anteriores) que pudiera haber quedado embebida en los artefactos
-      - name: Build clean allure-results (current run only)
+      - name: Download allure-results-advanced
+        uses: actions/download-artifact@v4
+        with:
+          name: allure-results-advanced
+          path: allure-results
+        continue-on-error: true
+
+      - name: Download allure-results-freerange
+        uses: actions/download-artifact@v4
+        with:
+          name: allure-results-freerange
+          path: allure-results
+        continue-on-error: true
+
+      - name: Download allure-results-api
+        uses: actions/download-artifact@v4
+        with:
+          name: allure-results-api
+          path: allure-results
+        continue-on-error: true
+
+      # ── 2. Eliminar TODA carpeta history que venga en los resultados ──────
+      #       Esto es lo que causaba que aparecieran errores de runs pasadas.
+      #       Allure genera su propio history al crear el reporte; no necesita
+      #       uno pre-existente para mostrar los resultados actuales.
+      - name: Remove any stale history from results
         run: |
-          mkdir -p allure-results
-          # Copiar únicamente los archivos en el primer nivel (los JSON/XML
-          # generados por el reporter de Cypress-Allure de esta ejecución)
-          find allure-results-raw -maxdepth 1 -type f \
-            \( -name "*.json" -o -name "*.xml" -o -name "*.png" -o -name "*.mp4" \) \
-            -exec cp {} allure-results/ \;
-          echo "── Resultados limpios ──"
-          ls -la allure-results/
+          find allure-results -type d -name "history" -exec rm -rf {} + 2>/dev/null || true
+          echo "── Contenido limpio de allure-results ──"
+          ls -la allure-results/ || echo "Carpeta vacía o no existe"
 
-      # ── 3. Instalar Allure CLI ─────────────────────────────────────────────
+      # ── 3. Instalar Allure CLI ────────────────────────────────────────────
       - name: Install Allure CLI
         run: |
           curl -sLo allure.tgz \
@@ -228,36 +247,16 @@ jobs:
           tar -zxf allure.tgz
           sudo mv allure-2.27.0 /opt/allure
           sudo ln -s /opt/allure/bin/allure /usr/local/bin/allure
+          allure --version
 
-      # ── 4. Restaurar historial de tendencia (desde artefacto, NO gh-pages) ─
-      #       Usamos un artefacto dedicado "allure-history" que vive entre runs.
-      #       La primera vez no existe → Allure arranca sin historial (correcto).
-      - name: Restore Allure history from artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: allure-history
-          path: allure-results/history
-        continue-on-error: true # primera ejecución: no existe aún, se ignora
-
-      # ── 5. Generar reporte ─────────────────────────────────────────────────
+      # ── 4. Generar reporte 100% limpio ───────────────────────────────────
       - name: Generate Allure report
         run: |
           allure generate allure-results --clean -o allure-report
-          echo "── Report contents ──"
+          echo "── Reporte generado ──"
           ls -la allure-report/
 
-      # ── 6. Guardar el historial generado como artefacto para el próximo run ─
-      #       Este artefacto reemplaza al anterior (mismo nombre).
-      - name: Save Allure history for next run
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: allure-history
-          path: allure-report/history/
-          if-no-files-found: warn
-          retention-days: 30 # conserva tendencia por 30 días
-
-      # ── 7. Publicar en GitHub Pages ────────────────────────────────────────
+      # ── 5. Publicar en GitHub Pages ───────────────────────────────────────
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
@@ -266,7 +265,7 @@ jobs:
           publish_branch: gh-pages
           force_orphan: true
 
-      # ── 8. Resumen ─────────────────────────────────────────────────────────
+      # ── 6. Resumen del pipeline ───────────────────────────────────────────
       - name: Pipeline summary
         if: always()
         run: |
