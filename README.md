@@ -1,12 +1,13 @@
-Cypress E2E Automation Framework
+🚀 Cypress E2E Automation Framework
 
 ""CI" (https://github.com/ipanaque94/Cypress-E2E-Automation/actions/workflows/cypress.yml/badge.svg)" (https://github.com/ipanaque94/Cypress-E2E-Automation/actions/workflows/cypress.yml)
-""Allure Report" (https://img.shields.io/badge/Allure_Report-ver_en_vivo-orange)" (https://ipanaque94.github.io/Cypress-E2E-Automation/)
-""Cypress" (https://img.shields.io/badge/Cypress-14-17202C?logo=cypress&logoColor=white)" (https://www.cypress.io/)
-""CI/CD" (https://img.shields.io/badge/GitHub_Actions-2088FF?logo=github-actions&logoColor=white)" (https://github.com/features/actions)
+""Allure Report" (https://img.shields.io/badge/Allure_Report-Ver_en_vivo-orange?logo=allure)" (https://ipanaque94.github.io/Cypress-E2E-Automation/)
+""Cypress" (https://img.shields.io/badge/Cypress-14-17202C?style=flat&logo=cypress&logoColor=white)" (https://www.cypress.io/)
+""CI/CD" (https://img.shields.io/badge/GitHub_Actions-2088FF?style=flat&logo=github-actions&logoColor=white)" (https://github.com/features/actions)
 
-🔗 Reporte Allure en vivo:
-https://ipanaque94.github.io/Cypress-E2E-Automation/
+---
+
+🔗 "Ver reporte Allure en vivo" (https://ipanaque94.github.io/Cypress-E2E-Automation/)
 
 ---
 
@@ -14,13 +15,11 @@ https://ipanaque94.github.io/Cypress-E2E-Automation/
 
 Este proyecto no está diseñado solo para ejecutar tests, sino para validar calidad real del sistema.
 
-Se enfoca en:
-
-- detectar falsos positivos y negativos
-- asegurar estabilidad en CI/CD
-- diseñar pruebas independientes del entorno
-- garantizar aislamiento entre tests
-- generar reportes confiables para toma de decisiones
+✔ Detección de falsos positivos y negativos
+✔ Tests estables y reproducibles
+✔ Independencia del entorno (CI/CD ready)
+✔ Aislamiento entre tests
+✔ Reportes confiables para toma de decisiones
 
 ---
 
@@ -29,130 +28,98 @@ Se enfoca en:
 Suites: 34 | Tests: 145 | Passing: 145 | Failing: 0
 Duración total: ~4:30
 
-Pipeline con ejecución paralela y reporte Allure publicado automáticamente en cada push.
+✔ Ejecución paralela en CI
+✔ Reporte Allure publicado automáticamente
 
 ---
 
-🚀 Qué cubre este framework
+🧪 Cobertura del Framework
 
-UI Testing
+🔹 UI Testing
 
-- Interacciones completas del usuario (click, type, drag & drop)
-- Validación de DOM y comportamiento dinámico
-- Testing responsive ("cy.viewport")
+- Interacciones reales de usuario (click, type, drag & drop)
+- Validación del DOM dinámico
+- Responsive testing ("cy.viewport")
 
-API Testing
+🔹 API Testing
 
 - Validación de endpoints con "cy.request"
-- Verificación de status codes y estructura de respuesta
+- Status codes y estructura de respuesta
 
-Testing avanzado
+🔹 Testing avanzado
 
-- Interceptación y stubbing ("cy.intercept")
-- Manejo de sesiones ("cy.session")
-- Control del tiempo ("cy.clock", "cy.tick")
-- Testing de accesibilidad con axe (WCAG)
+- "cy.intercept" (mocking y stubbing)
+- "cy.session" (manejo de sesiones)
+- "cy.clock" / "cy.tick" (control del tiempo)
+- Accessibility testing (WCAG con axe)
 
-Arquitectura
+🔹 Arquitectura
 
 - Page Object Model (POM)
 - Custom commands ("cy.login")
 - Data-driven testing con fixtures
 
-CI/CD
+🔹 CI/CD
 
-- GitHub Actions con jobs paralelos
-- Generación automática de reportes Allure
-- Publicación en GitHub Pages
-
----
-
-🧩 Problemas reales analizados y resueltos
-
-Durante el desarrollo no solo implementé tests, sino que enfrenté problemas típicos de QA en entornos reales.
+- GitHub Actions (jobs paralelos)
+- Allure Report automático
+- Deploy en GitHub Pages
 
 ---
 
-🔍 1. Tests inestables por datos dinámicos
+🧩 Problemas reales resueltos (enfoque QA)
 
-Problema:
-Tests fallaban sin cambios en el código.
+🔍 Tests inestables por datos dinámicos
 
-Análisis:
-Dependían de datos externos variables (ej: unidades cambiantes como Mbps vs MB/s).
+Tests fallaban sin cambios en código debido a datos externos variables.
 
-Decisión:
-Reemplacé validaciones exactas por validaciones estructurales y fuentes deterministas.
-
-Resultado:
-Tests estables y reproducibles en cualquier entorno.
+Solución: validaciones estructurales + datos deterministas
+Resultado: estabilidad total en CI
 
 ---
 
-🔍 2. Fallos en CI por dependencia de entorno
+🔍 Fallos en CI por dependencia de entorno
 
-Problema:
-Tests funcionaban localmente pero fallaban en CI.
+Tests dependían de "localhost".
 
-Causa:
-Dependencia de "localhost".
-
-Solución:
-Uso de endpoints públicos y mocks controlados.
-
-Resultado:
-Pipeline portable y sin dependencias de infraestructura.
+Solución: uso de endpoints públicos y mocks
+Resultado: ejecución portable en cualquier entorno
 
 ---
 
-🔍 3. Falsos positivos en manejo de errores
+🔍 Falsos positivos en manejo de errores
 
-Problema:
-Tests pasaban aunque había errores reales.
+Errores no se detectaban correctamente.
 
-Causa:
-Manejo incorrecto de errores en Cypress (no usa Promises estándar).
-
-Solución:
-Validación explícita con "failOnStatusCode: false" y control en ".then()".
-
-Resultado:
-Mayor precisión en la detección de fallos reales.
+Solución: control explícito con "failOnStatusCode: false"
+Resultado: detección real de fallos
 
 ---
 
-🔍 4. Falta de aislamiento entre tests
+🔍 Falta de aislamiento entre tests
 
-Problema:
-Tests dependían del estado previo (cookies, sesiones).
+Estado compartido (cookies, sesiones).
 
 Solución:
 
-- Uso de "cy.session()"
-- Limpieza de storage
-- Uso de fixtures independientes
+- "cy.session()"
+- limpieza de storage
+- uso de fixtures
 
-Resultado:
-Tests aislados, paralelizables y confiables.
+Resultado: tests independientes y confiables
 
 ---
 
-🔍 5. Reportes inconsistentes en Allure (CI)
+🔍 Reportes incorrectos en Allure
 
-Problema:
-El reporte mostraba resultados antiguos.
-
-Causa:
-Mezcla de resultados entre jobs del pipeline.
+Resultados antiguos aparecían en CI.
 
 Solución:
 
-- Separación de resultados por job
-- Configuración dinámica ("ALLURE_RESULTS_DIR")
-- Merge controlado de artefactos
+- aislamiento por job ("ALLURE_RESULTS_DIR")
+- merge controlado
 
-Resultado:
-Reporte consistente y confiable.
+Resultado: reportes consistentes
 
 ---
 
@@ -160,11 +127,6 @@ Reporte consistente y confiable.
 
 cypress/
 ├── e2e/
-│   ├── 1-getting-started/
-│   ├── 2-advanced-examples/
-│   ├── 3-freeRangeTest/
-│   ├── Apis-Test/
-│   └── PageObjetModel/
 ├── fixtures/
 ├── Pages/
 └── support/
@@ -177,12 +139,15 @@ git clone https://github.com/ipanaque94/Cypress-E2E-Automation.git
 cd Cypress-E2E-Automation
 npm install
 
+# UI
 npx cypress open
+
+# Headless
 npx cypress run --browser chrome
 
 ---
 
-🧪 Pipeline CI/CD
+🔄 Pipeline CI/CD
 
 Push / PR
    │
@@ -195,7 +160,7 @@ Push / PR
          │
      Allure Report
          │
-   GitHub Pages
+     GitHub Pages
 
 ---
 
@@ -210,17 +175,12 @@ Push / PR
 
 ---
 
-👤 Autor
+👨‍💻 Autor
 
 Enoc Ipanaque
 QA Automation Engineer
 
-- Selenium
-- Playwright
-- Cypress
-- API Testing
-- CI/CD
+🔗 LinkedIn: https://www.linkedin.com/in/enoc-isaac-ipanaque-rodas-b3729a283
+🔗 GitHub: https://github.com/ipanaque94
+📧 Email: rodasenoc4@gmail.com
 
-LinkedIn: https://www.linkedin.com/in/enoc-isaac-ipanaque-rodas-b3729a283
-GitHub: https://github.com/ipanaque94
-Email: rodasenoc4@gmail.com
