@@ -7,9 +7,10 @@ module.exports = defineConfig({
   e2e: {
     specPattern: "cypress/e2e/**/*.cy.{js,jsx,ts,tsx}",
     supportFile: "cypress/support/e2e.js",
+
     setupNodeEvents(on, config) {
       allureCypress(on, config, {
-        resultsDir: "allure-results",
+        resultsDir: process.env.ALLURE_RESULTS_DIR || "allure-results",
       });
 
       on("task", {
@@ -17,17 +18,21 @@ module.exports = defineConfig({
           const reset = require(path.resolve(__dirname, "cypress/db/reset.js"));
           return await reset(users);
         },
+
         "api:authenticate": async ({ username, password }) => {
           const { db, init } = require(
             path.resolve(__dirname, "cypress/db/connection.js"),
           );
+
           await init();
+
           return new Promise((resolve, reject) => {
             db.get(
               "SELECT * FROM users WHERE username = ? AND password = ?",
               [username, password],
               (err, row) => {
                 if (err) return reject(err);
+
                 if (row) {
                   resolve({
                     statusCode: 200,
