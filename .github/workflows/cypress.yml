@@ -27,6 +27,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Clean allure results
+        run: rm -rf allure-results allure-report
+
       - name: Run Cypress — Getting Started
         uses: cypress-io/github-action@v6
         with:
@@ -64,6 +67,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Clean allure results
+        run: rm -rf allure-results allure-report
+
       - name: Run Cypress — Advanced Examples
         uses: cypress-io/github-action@v6
         with:
@@ -100,6 +106,9 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Clean allure results
+        run: rm -rf allure-results allure-report
 
       - name: Run Cypress — FreeRange y POM
         uses: cypress-io/github-action@v6
@@ -141,6 +150,9 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Clean allure results
+        run: rm -rf allure-results allure-report
 
       - name: Run Cypress — API Tests
         uses: cypress-io/github-action@v6

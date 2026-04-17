@@ -1,10 +1,17 @@
 describe("Tablas estáticas y dinámicas", function () {
-  it("Validamos tabla estática", function () {
-    cy.visit("https://testpages.herokuapp.com/styled/tag/table.html", {
-      failOnStatusCode: false,
-    });
+  describe("Tablas estáticas y dinámicas", () => {
+    it("Validamos tabla estática", () => {
+      cy.visit("https://www.w3schools.com/html/html_tables.asp");
+      cy.get("#customers").should("be.visible");
 
-    cy.contains("td", "Douglas").next().should("have.text", "42");
+      cy.contains("td", "Maria Anders")
+        .should("exist")
+        .next()
+        .should("have.text", "Germany")
+        .then(() => {
+          cy.log("Se encontró 'Maria Anders' y su país es 'Germany'");
+        });
+    });
   });
 
   it("Validamos tabla dinámica", function () {
