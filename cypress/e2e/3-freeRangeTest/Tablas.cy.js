@@ -1,8 +1,10 @@
 describe("Tablas estáticas y dinámicas", function () {
   it("Validamos tabla estática", function () {
-    cy.visit("https://testpages.herokuapp.com/styled/tag/table.html");
-    failOnStatusCode: (false,
-      cy.contains("td", "Douglas").next().should("have.text", "42"));
+    cy.visit("https://testpages.herokuapp.com/styled/tag/table.html", {
+      failOnStatusCode: false,
+    });
+
+    cy.contains("td", "Douglas").next().should("have.text", "42");
   });
 
   it("Validamos tabla dinámica", function () {
