@@ -53,12 +53,12 @@
 | Advanced Examples | 16 | 118 | ~1:45 |
 | FreeRange + POM | 6 | 13 | ~1:10 |
 | API Tests | 7 | 7 | ~0:30 |
-| **TOTAL** | **34** | **145** | **~4:30** |
+| **TOTAL** | **34** | **146** | **~4:30** |
 
 </div>
 
 ```
-Suites: 34  │  Tests: 145  │  Passing: 145  │  Failing: 0  │  Duración: ~4:30
+Suites: 34  │  Tests: 145  │  Passing: 146  │  Failing: 0  │  Duración: ~4:30
 ```
 
 ---
