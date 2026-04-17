@@ -38,9 +38,6 @@ jobs:
           install: false
         continue-on-error: true
 
-      - name: Remove allure history before upload
-        run: rm -rf allure-results/history || true
-
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -80,9 +77,6 @@ jobs:
           spec: cypress/e2e/2-advanced-examples/**/*.cy.js
           install: false
         continue-on-error: true
-
-      - name: Remove allure history before upload
-        run: rm -rf allure-results/history || true
 
       - uses: actions/upload-artifact@v4
         if: always()
@@ -128,9 +122,6 @@ jobs:
         env:
           CYPRESS_defaultCommandTimeout: "10000"
 
-      - name: Remove allure history before upload
-        run: rm -rf allure-results/history || true
-
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -171,9 +162,6 @@ jobs:
           install: false
         continue-on-error: true
 
-      - name: Remove allure history before upload
-        run: rm -rf allure-results/history || true
-
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -201,11 +189,16 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           pattern: allure-results-*
-          path: allure-results
+          path: allure-results-raw
           merge-multiple: true
 
-      - name: Remove any history folders from downloaded results
-        run: find allure-results -type d -name history -prune -exec rm -rf {} + || true
+      - name: Strip history from downloaded results
+        run: find allure-results-raw -type d -name history -exec rm -rf {} + 2>/dev/null || true
+
+      - name: Prepare clean allure-results folder
+        run: |
+          mkdir -p allure-results
+          cp -r allure-results-raw/. allure-results/
 
       - name: Install Allure CLI
         run: |
@@ -214,9 +207,22 @@ jobs:
           sudo mv allure-2.27.0 /opt/allure
           sudo ln -s /opt/allure/bin/allure /usr/local/bin/allure
 
+      - name: Restore Allure history from gh-pages
+        run: |
+          if git ls-remote --exit-code origin gh-pages; then
+            git fetch origin gh-pages --depth=1
+            mkdir -p allure-results/history
+            git checkout origin/gh-pages -- history 2>/dev/null \
+              && cp -r history/. allure-results/history/ \
+              || echo "No history found in gh-pages — first run"
+          else
+            echo "gh-pages branch does not exist yet — first run"
+          fi
+
       - name: Generate Allure report
         run: |
           allure generate allure-results --clean -o allure-report
+          echo "── Report contents ──"
           ls -la allure-report/
 
       - name: Deploy to GitHub Pages
@@ -234,9 +240,9 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "| Suite | Estado |" >> $GITHUB_STEP_SUMMARY
           echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Getting Started | ${{ needs.getting-started.result == 'success' && '✅ Pasó' || '⚠️ Ver reporte' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Advanced Examples | ${{ needs.advanced-examples.result == 'success' && '✅ Pasó' || '⚠️ Ver reporte' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| FreeRange + POM | ${{ needs.freerange-pom.result == 'success' && '✅ Pasó' || '⚠️ Ver reporte' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| API Tests | ${{ needs.api-tests.result == 'success' && '✅ Pasó' || '⚠️ Ver reporte' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Getting Started   | ${{ needs.getting-started.result   == 'success' && '✅ Pasó' || '❌ Ver reporte' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Advanced Examples | ${{ needs.advanced-examples.result == 'success' && '✅ Pasó' || '❌ Ver reporte' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| FreeRange + POM   | ${{ needs.freerange-pom.result     == 'success' && '✅ Pasó' || '❌ Ver reporte' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| API Tests         | ${{ needs.api-tests.result         == 'success' && '✅ Pasó' || '❌ Ver reporte' }} |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "🔗 **Reporte Allure:** https://ipanaque94.github.io/Cypress-E2E-Automation/" >> $GITHUB_STEP_SUMMARY
