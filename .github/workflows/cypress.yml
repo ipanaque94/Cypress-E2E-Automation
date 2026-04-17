@@ -1,4 +1,4 @@
-name: Cypress E2E Tests
+name: Cypress E2E + Allure Report
 
 on:
   push:
@@ -9,90 +9,97 @@ on:
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
 
 jobs:
   getting-started:
-    name: Getting Started
+    name: "Suite — Getting Started"
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
 
       - name: Run Cypress — Getting Started
         uses: cypress-io/github-action@v6
         with:
           browser: chrome
           spec: cypress/e2e/1-getting-started/**/*.cy.js
+          install: false
         continue-on-error: true
 
-      - name: Upload screenshots on failure
-        uses: actions/upload-artifact@v4
-        if: failure()
-        with:
-          name: screenshots-getting-started
-          path: cypress/screenshots
-          retention-days: 7
-
-      - name: Upload videos
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: videos-getting-started
-          path: cypress/videos
-          retention-days: 7
-
-      - name: Upload Allure results
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: allure-results-getting-started
-          path: allure-results
+          path: allure-results/
+          if-no-files-found: warn
+          retention-days: 1
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: screenshots-getting-started
+          path: cypress/screenshots/
           retention-days: 7
 
   advanced-examples:
-    name: Advanced Examples
+    name: "Suite — Advanced Examples"
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
 
       - name: Run Cypress — Advanced Examples
         uses: cypress-io/github-action@v6
         with:
           browser: chrome
           spec: cypress/e2e/2-advanced-examples/**/*.cy.js
+          install: false
         continue-on-error: true
 
-      - name: Upload screenshots on failure
-        uses: actions/upload-artifact@v4
-        if: failure()
-        with:
-          name: screenshots-advanced
-          path: cypress/screenshots
-          retention-days: 7
-
-      - name: Upload videos
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: videos-advanced
-          path: cypress/videos
-          retention-days: 7
-
-      - name: Upload Allure results
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: allure-results-advanced
-          path: allure-results
+          path: allure-results/
+          if-no-files-found: warn
+          retention-days: 1
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: screenshots-advanced
+          path: cypress/screenshots/
           retention-days: 7
 
-  freerange-tests:
-    name: FreeRange + POM Tests
+  freerange-pom:
+    name: "Suite — FreeRange + POM"
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
 
       - name: Run Cypress — FreeRange y POM
         uses: cypress-io/github-action@v6
@@ -101,83 +108,33 @@ jobs:
           spec: |
             cypress/e2e/3-freeRangeTest/**/*.cy.js
             cypress/e2e/PageObjetModel/**/*.cy.js
+          install: false
         continue-on-error: true
         env:
-          CYPRESS_defaultCommandTimeout: 10000
+          CYPRESS_defaultCommandTimeout: "10000"
 
-      - name: Upload screenshots on failure
-        uses: actions/upload-artifact@v4
-        if: failure()
-        with:
-          name: screenshots-freerange
-          path: cypress/screenshots
-          retention-days: 7
-
-      - name: Upload videos
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: videos-freerange
-          path: cypress/videos
-          retention-days: 7
-
-      - name: Upload Allure results
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: allure-results-freerange
-          path: allure-results
+          path: allure-results/
+          if-no-files-found: warn
+          retention-days: 1
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: screenshots-freerange
+          path: cypress/screenshots/
           retention-days: 7
 
   api-tests:
-    name: API Tests
+    name: "Suite — API Tests"
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Run Cypress — API Tests
-        uses: cypress-io/github-action@v6
-        with:
-          browser: chrome
-          spec: cypress/e2e/Apis-Test/**/*.cy.js
-        continue-on-error: true
-
-      - name: Upload screenshots on failure
-        uses: actions/upload-artifact@v4
-        if: failure()
-        with:
-          name: screenshots-api
-          path: cypress/screenshots
-          retention-days: 7
-
-      - name: Upload videos
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: videos-api
-          path: cypress/videos
-          retention-days: 7
-
-      - name: Upload Allure results
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: allure-results-api
-          path: allure-results
-          retention-days: 7
-
-  report:
-    name: Reporte consolidado
-    runs-on: ubuntu-latest
-    needs: [getting-started, advanced-examples, freerange-tests, api-tests]
-    if: always()
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
@@ -185,37 +142,75 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Download screenshots
-        uses: actions/download-artifact@v4
+      - name: Run Cypress — API Tests
+        uses: cypress-io/github-action@v6
         with:
-          pattern: screenshots-*
-          path: cypress/screenshots
-          merge-multiple: true
+          browser: chrome
+          spec: cypress/e2e/Apis-Test/**/*.cy.js
+          install: false
+        continue-on-error: true
 
-      - name: Download Allure results
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: allure-results-api
+          path: allure-results/
+          if-no-files-found: warn
+          retention-days: 1
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: screenshots-api
+          path: cypress/screenshots/
+          retention-days: 7
+
+  allure-report:
+    name: "Generar y publicar reporte Allure"
+    runs-on: ubuntu-latest
+    needs: [getting-started, advanced-examples, freerange-pom, api-tests]
+    if: always()
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download all allure results
         uses: actions/download-artifact@v4
         with:
           pattern: allure-results-*
           path: allure-results
           merge-multiple: true
 
+      - name: Install Allure CLI
+        run: |
+          curl -sLo allure.tgz https://github.com/allure-framework/allure2/releases/download/2.27.0/allure-2.27.0.tgz
+          tar -zxf allure.tgz
+          sudo mv allure-2.27.0 /opt/allure
+          sudo ln -s /opt/allure/bin/allure /usr/local/bin/allure
+
       - name: Generate Allure report
         run: |
-          mkdir -p allure-results
-          npx allure generate allure-results --clean -o allure-report || echo "Allure report generation failed"
-          echo "## Cypress E2E + Allure Results" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Job | Estado |" >> $GITHUB_STEP_SUMMARY
-          echo "|-----|--------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Getting Started | ✅ |" >> $GITHUB_STEP_SUMMARY
-          echo "| Advanced Examples | ✅ |" >> $GITHUB_STEP_SUMMARY
-          echo "| FreeRange + POM | ✅ |" >> $GITHUB_STEP_SUMMARY
-          echo "| API Tests | ✅ |" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Videos, screenshots y reportes Allure disponibles en **Artifacts** por 7 días." >> $GITHUB_STEP_SUMMARY
+          allure generate allure-results --clean -o allure-report
+          echo "Reporte generado. Archivos:"
+          ls -la allure-report/
 
-      - name: Deploy Allure report to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: allure-report
+          publish_branch: gh-pages
+          force_orphan: true
+
+      - name: Pipeline summary
+        if: always()
+        run: |
+          echo "## Cypress E2E — Allure Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Suite | Estado |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Getting Started | ${{ needs.getting-started.result == 'success' && '✅ Pasó' || '⚠️ Ver reporte' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Advanced Examples | ${{ needs.advanced-examples.result == 'success' && '✅ Pasó' || '⚠️ Ver reporte' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| FreeRange + POM | ${{ needs.freerange-pom.result == 'success' && '✅ Pasó' || '⚠️ Ver reporte' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| API Tests | ${{ needs.api-tests.result == 'success' && '✅ Pasó' || '⚠️ Ver reporte' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "🔗 **Reporte Allure:** https://ipanaque94.github.io/Cypress-E2E-Automation/" >> $GITHUB_STEP_SUMMARY

@@ -14,10 +14,13 @@
 // ***********************************************************
 
 // Import commands.js using ES2015 syntax:
-import './commands'
-Cypress.on('uncaught:exception',(err, runnable)=> {
-    //returnig false here prevents Cypress From
-    //failing the test    
-    return false
-})
-require('cypress-xpath');
+import "allure-cypress";
+import "cypress-axe";
+import "./commands";
+
+Cypress.on("uncaught:exception", (err, runnable) => {
+  // returning false here prevents Cypress from failing the test
+  return false;
+});
+
+require("cypress-xpath");
