@@ -11,7 +11,7 @@
 [![Cypress](https://img.shields.io/badge/Cypress-14-17202C?style=flat&logo=cypress&logoColor=white)](https://www.cypress.io/)
 [![JS](https://img.shields.io/badge/JavaScript-ES2020-F7DF1E?style=flat&logo=javascript&logoColor=black)](https://developer.mozilla.org/docs/Web/JavaScript)
 [![Actions](https://img.shields.io/badge/CI%2FCD-GitHub_Actions-2088FF?style=flat&logo=github-actions&logoColor=white)](https://github.com/features/actions)
-[![Tests](https://img.shields.io/badge/145_tests-passing-22c55e?style=flat&logo=checkmarx&logoColor=white)](https://github.com/ipanaque94/Cypress-E2E-Automation/actions)
+[![Tests](https://img.shields.io/badge/146_tests-passing-22c55e?style=flat)](https://github.com/ipanaque94/Cypress-E2E-Automation/actions)
 
 <br/>
 
@@ -21,19 +21,11 @@
 
 ---
 
-## 🧠 Enfoque como QA
+## 🧠 Por qué construí esto
 
-> Este proyecto no está diseñado solo para ejecutar tests — está diseñado para **detectar problemas reales y comunicarlos con claridad**.
+Terminé el curso de Cypress de Free Range Testers y quise llevar los ejercicios a algo más cercano a un entorno real de QA. En lugar de dejar tests sueltos por carpeta, armé una suite organizada con pipeline automático y reporte publicado en cada ejecución.
 
-La diferencia entre un test que "pasa" y un test que **garantiza calidad** está en las decisiones detrás de él: qué se valida, por qué, y cómo se comporta cuando el sistema falla de verdad.
-
-```
-✔ Detección de falsos positivos y negativos
-✔ Tests estables y reproducibles en cualquier entorno
-✔ Aislamiento entre tests — sin estado compartido
-✔ Reportes que cualquier persona del equipo puede leer
-✔ Pipeline automático que detecta regresiones en cada push
-```
+El objetivo no era acumular tests — era entender cómo se construye una suite que un equipo real pueda confiar.
 
 ---
 
@@ -52,67 +44,71 @@ La diferencia entre un test que "pasa" y un test que **garantiza calidad** está
 
 ---
 
-## 🧩 Problemas reales resueltos
+## 🔍 Lo que realmente aprendí sobre QA
 
-> Esta sección no describe lo que aprendí en un tutorial. Describe lo que encontré cuando el tutorial terminó — los problemas reales que tuve que entender desde adentro para resolverlos. Cada uno cambió cómo pienso sobre QA.
-
----
-
-### 🔍 Tests inestables por datos externos que cambian sin avisar
-
-Varios tests fallaban sin que yo hubiera tocado una sola línea de código. El sitio que estaba probando actualizó su menú: renombró un enlace, cambió el título de una página. Mis tests — que buscaban texto exacto — fallaron. Desde afuera parecía un bug del sistema. Era un problema de diseño del test.
-
-**Lo que aprendí sobre QA:** un test que falla por un cambio de contenido cuando el sistema está funcionando bien es un falso positivo. Y los falsos positivos son costosos: generan ruido, consumen tiempo de diagnóstico y, eventualmente, hacen que el equipo deje de confiar en la suite. Cuando eso pasa, los tests pierden su valor — pueden fallar por un bug real y nadie lo nota porque aprendieron a ignorarlos.
-
-**Cómo lo resolví:** separé lo que es comportamiento (¿la página carga?, ¿el header existe?, ¿el status HTTP es 200?) de lo que es contenido (¿el texto dice exactamente "Talleres"?). Los tests validan el primero. El contenido puede cambiar sin que eso sea un bug.
+> Más allá de las herramientas, esto es lo que cambió en cómo pienso sobre testing.
 
 ---
 
-### 🔍 Fallos en CI por dependencia de infraestructura local
+### ☑️ La estabilidad importa más que la cantidad de tests
 
-Un test de sesiones y cookies apuntaba a `localhost:3000` — un servidor que yo había levantado localmente para practicar. En mi máquina pasaba perfectamente. En GitHub Actions fallaba con `ECONNREFUSED` porque el runner de CI no tiene ese servidor.
+Al principio mi instinto era agregar más tests para "cubrir más". Pero algunos fallaban una vez sí y una vez no, sin que el sistema hubiera cambiado. Eso es peor que no tener el test: un test intermitente genera desconfianza en toda la suite. Si el equipo aprende a ignorar los fallos porque "a veces pasa", también va a ignorar el fallo real cuando aparezca.
 
-**Lo que aprendí sobre QA:** un test que solo funciona en mi máquina no es un test automatizado. Es un script manual que alguien tiene que ejecutar a mano con la infraestructura correcta preparada de antemano. La automatización solo tiene valor real cuando el test puede correr en cualquier entorno, sin intervención humana, en cualquier momento.
+Entendí que un test confiable que corre siempre igual vale más que cinco tests que pasan la mayoría de las veces. La cobertura no se mide en cantidad — se mide en cuánto puedes confiar en lo que el resultado te dice.
 
-El criterio que adopté: antes de subir cualquier test me pregunto "¿puede correr esto en una máquina vacía recién creada?". Si la respuesta es no, hay una dependencia que resolver antes de llamarlo automatizado.
-
-**Cómo lo resolví:** reescribí todos los tests de sesiones usando `the-internet.herokuapp.com`, un entorno público y estable sin dependencias de infraestructura propia. El test ahora corre igual en local, en CI y en cualquier otra máquina.
+Eso me llevó a revisar cada test y preguntarme: **¿este test falla solo cuando el sistema tiene un problema real, o también puede fallar por otras razones?** Esa pregunta cambió cómo diseño los assertions.
 
 ---
 
-### 🔍 Falsos positivos en manejo de errores HTTP
+### ☑️ Entender bien el flujo antes de automatizar
 
-Estaba probando cómo la aplicación maneja respuestas de error de la API. El problema: Cypress por defecto lanza una excepción cuando recibe un status 4xx o 5xx, y el test fallaba en el paso de la request — antes de llegar al assertion que yo quería validar.
+Mi proceso en este proyecto fue siempre el mismo: primero ejecutaba el caso manualmente, observaba qué pasaba en cada paso, identificaba qué era lo que realmente importaba validar. Recién después automatizaba.
 
-El resultado era un test que "falla" pero por la razón equivocada. No estaba detectando un bug del sistema — estaba chocando con el comportamiento por defecto de Cypress antes de poder hacer la validación real.
+Eso parece obvio, pero no lo es. Es fácil empezar a escribir código sin tener claro qué está probando. El resultado son tests llenos de assertions que validan cosas irrelevantes y no validan lo que importa. O peor: tests que pasan aunque el sistema esté roto porque el assertion no apunta al lugar correcto.
 
-**Lo que aprendí sobre QA:** hay una diferencia importante entre un test que falla porque el sistema tiene un bug y un test que falla porque el framework se comporta de una manera que no esperabas. Confundirlos desperdicia tiempo de diagnóstico y puede llevar a "corregir" algo que no está roto.
-
-**Cómo lo resolví:** usar `failOnStatusCode: false` le dice a Cypress explícitamente que un status de error es un resultado válido para este test. No es una forma de ignorar el error — es una forma de decirle al framework "sé lo que voy a recibir, déjame validarlo yo".
+Ejecutar manualmente primero me obligó a hacerme la pregunta correcta antes de escribir: **¿qué comportamiento del sistema estoy garantizando con este test?** No qué código voy a escribir, sino qué promesa está haciendo el test sobre el sistema.
 
 ---
 
-### 🔍 Falta de aislamiento entre tests — estado que se filtra entre tests
+### ☑️ Separar lo que es comportamiento de lo que es contenido
 
-Algunos tests fallaban de forma intermitente: pasaban cuando corrían solos, fallaban cuando corrían con otros. El problema era estado compartido: cookies de una sesión anterior, datos en `localStorage`, variables globales que un test modificaba y el siguiente heredaba sin saberlo.
+Cuando empecé a testear el sitio de Free Range Testers, validaba texto exacto: el nombre de un enlace, el título de una página. El sitio actualizó su contenido y mis tests fallaron. Pero el sistema no estaba roto — el sitio simplemente cambió un texto.
 
-**Lo que aprendí sobre QA:** los tests intermitentes son más peligrosos que los tests que siempre fallan. Un test que siempre falla es un problema visible que alguien va a corregir. Un test que falla una de cada tres veces lleva a conversaciones de "en mi máquina pasa", dificulta el diagnóstico y puede ocultar bugs reales que aparecen solo en ciertas condiciones de estado.
+Eso me enseñó una distinción que aplico en todos los tests ahora: **comportamiento** es lo que el sistema hace (¿la página responde?, ¿la navegación funciona?, ¿el endpoint devuelve datos?). **Contenido** es lo que dice (¿el botón dice exactamente "Talleres"?). El comportamiento es responsabilidad del sistema y debo validarlo. El contenido puede cambiar sin que eso sea un bug.
 
-El aislamiento no es un detalle de implementación — es una decisión de diseño que afecta la confiabilidad de toda la suite.
-
-**Cómo lo resolví:** `cy.session()` para encapsular el estado de autenticación por test, `cy.clearCookies()` y limpieza de `localStorage` en el setup, y fixtures externos para que los datos de entrada nunca dependan del estado que dejó el test anterior.
+Un test que falla cuando el sistema está funcionando bien genera trabajo innecesario y erosiona la confianza del equipo en la suite.
 
 ---
 
-### 🔍 Reporte Allure se generaba vacío — el reporter estaba configurado pero no escuchaba
+### ☑️ Organizar el código de pruebas como si alguien más lo fuera a leer
 
-Configuré `allureCypress` en `cypress.config.js`, el pipeline corría sin errores, se generaba la carpeta `allure-report`... pero no aparecía ningún test adentro. Solo la página en blanco de Allure con cero resultados.
+Al inicio tenía tests largos donde todo estaba junto: los datos, los selectores, la lógica. Funcionaban, pero eran difíciles de entender de un vistazo y más difíciles de mantener.
 
-El problema no estaba en el workflow ni en la configuración — estaba en cómo funciona `allure-cypress` internamente. El reporter tiene dos partes: una en Node.js que recibe la configuración, y otra en el browser que escucha los eventos de cada test. Sin importar `allure-cypress` en `cypress/support/e2e.js`, el lado del browser nunca se activa. El reporter está registrado pero sordo.
+Empecé a separar responsabilidades: los datos van en fixtures JSON, los selectores y acciones van en Page Objects, las secuencias repetidas van en custom commands. Cada archivo tiene una sola responsabilidad.
 
-**Lo que aprendí sobre QA:** los reportes no son un detalle de entrega — son la forma en que el equipo toma decisiones. Un reporte vacío o incorrecto es tan problemático como un test que falla por la razón equivocada: oculta información que alguien necesita. Entender cómo funciona tu herramienta de reporting desde adentro es parte del trabajo de QA, no un extra.
+Esto no es solo una buena práctica de código — es una decisión de calidad. Un test que nadie entiende es un test que nadie va a mantener. Y un test que no se mantiene se convierte en ruido: falla, alguien lo desactiva "temporalmente", y esa cobertura desaparece sin que nadie lo note.
 
-**Cómo lo resolví:** `import "allure-cypress"` en `cypress/support/e2e.js` activa el listener del lado del browser. Además, aislé los resultados Allure por job en CI para evitar que resultados de runs anteriores contaminaran el reporte actual.
+Cuando el código de pruebas es claro, el equipo puede leer el test y entender qué garantía está dando sobre el sistema. Eso convierte los tests en documentación viva.
+
+---
+
+### ☑️ Los reportes son para tomar decisiones, no para registrar ejecuciones
+
+Integrar Allure al pipeline me hizo ver los reportes de una manera diferente. Un reporte no es solo "cuántos tests pasaron". Es la respuesta a la pregunta que el equipo necesita responder después de un deploy: **¿podemos confiar en que el sistema está funcionando?**
+
+Para que esa respuesta sea útil, el reporte tiene que ser claro. Tiene que mostrar qué se probó, qué falló y con suficiente contexto para entender por qué. Un reporte con 145 tests en verde da confianza. Un reporte con 3 tests en rojo con screenshots y nombre descriptivo da dirección.
+
+Publicar el reporte automáticamente en cada push —disponible para cualquier persona del equipo sin tener que ejecutar nada— es parte de hacer que la suite sea útil más allá de mi máquina local.
+
+---
+
+### ☑️ El aislamiento entre tests no es un detalle técnico — es una decisión de diseño
+
+Cuando los tests comparten estado —cookies de una sesión anterior, datos en `localStorage`, variables que un test modifica y el siguiente hereda— el orden de ejecución empieza a importar. Y en automatización, el orden no debería importar nunca.
+
+Si el orden importa, significa que los tests tienen dependencias ocultas entre sí. Eso hace que los fallos sean difíciles de reproducir: el test pasa si corre solo, falla si corre después de otro. Ese tipo de fallo es el más costoso porque nadie sabe con certeza qué está causando el problema.
+
+Diseñar cada test para que empiece desde cero —sin asumir nada del estado que dejó el test anterior— es lo que hace que los resultados sean predecibles y que los fallos sean accionables.
 
 ---
 
@@ -149,7 +145,7 @@ El problema no estaba en el workflow ni en la configuración — estaba en cómo
 </details>
 
 <details>
-<summary><b>⚡ Testing avanzado — técnicas que pocos juniors conocen</b></summary>
+<summary><b>⚡ Testing avanzado</b></summary>
 <br/>
 
 | Técnica | Spec | Descripción |
@@ -157,24 +153,24 @@ El problema no estaba en el workflow ni en la configuración — estaba en cómo
 | Accessibility WCAG | `Accessibilidad.cy.js` | `cypress-axe` — impacto, regla y selector por violación |
 | Sesiones y cookies | `SessionYCookis.cy.js` | `cy.session()`, `setCookie`, `clearCookies` |
 | Control de tiempo | `spies_stubs_clocks.cy.js` | `cy.clock()`, `cy.tick()`, `cy.spy()`, `cy.stub()` |
-| iFrame testing | `iFrameTesting.cy.js` | `contentDocument.body` para acceder al iframe |
-| Promises en Cypress | `PromesasCypress.cy.js` | `Cypress.Promise`, fetch, `failOnStatusCode: false` |
+| iFrame testing | `iFrameTesting.cy.js` | Acceso a contenido dentro de iframes |
+| Promises en Cypress | `PromesasCypress.cy.js` | `Cypress.Promise`, fetch, manejo de errores async |
 | Tablas HTML | `Tablas.cy.js` | Validación estructural y ordenamiento por columna |
 | Popups | `TestPopup.cy.js` | Manejo de ventanas emergentes del mismo origen |
 
 </details>
 
 <details>
-<summary><b>🏗️ Arquitectura — patrones que escalan</b></summary>
+<summary><b>🏗️ Arquitectura y patrones</b></summary>
 <br/>
 
 | Patrón | Implementación | Por qué importa |
 |--------|---------------|-----------------|
 | Page Object Model | `cypress/Pages/FreeRangeHome.js` | Un selector cambia → se actualiza en un lugar |
-| Custom commands | `cypress/support/commands.js` | `cy.login()` — legible y reutilizable |
-| Fixtures JSON | `cypress/fixtures/` | Datos de test fuera del código |
+| Custom commands | `cypress/support/commands.js` | `cy.login()` — legible y reutilizable en toda la suite |
+| Fixtures JSON | `cypress/fixtures/` | Datos de test separados de la lógica del test |
 | Data-driven | `forEach` sobre arrays | Un dataset más → un test más, sin duplicar código |
-| Aliasing | `.as()` | Evita queries redundantes al DOM |
+| Aliasing | `.as()` | Reutilizar elementos y requests sin queries redundantes |
 
 </details>
 
@@ -187,7 +183,7 @@ Cypress-E2E-Automation/
 │
 ├── .github/
 │   └── workflows/
-│       └── cypress.yml          ← 4 jobs paralelos + Allure Pages
+│       └── cypress.yml          ← 4 jobs paralelos + deploy Allure Pages
 │
 ├── cypress/
 │   ├── e2e/
@@ -201,7 +197,7 @@ Cypress-E2E-Automation/
 │   ├── Pages/                   ← FreeRangeHome.js (Page Object)
 │   └── support/
 │       ├── commands.js          ← cy.login() y otros custom commands
-│       └── e2e.js               ← import allure-cypress · cypress-axe
+│       └── e2e.js               ← allure-cypress · cypress-axe
 │
 ├── cypress.config.js
 └── package.json
@@ -251,7 +247,8 @@ npx cypress run --browser chrome
 npx cypress run --spec "cypress/e2e/Apis-Test/**/*.cy.js"
 
 # Reporte Allure local
-npx allure generate allure-results --clean -o allure-report && npx allure open allure-report
+npx allure generate allure-results --clean -o allure-report
+npx allure open allure-report
 ```
 
 ---
