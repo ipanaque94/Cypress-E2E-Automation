@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://capsule-render.vercel.app/api?type=waving&color=0:0d1117,50:161b22,100:1f2937&height=200&section=header&text=Cypress%20E2E%20Automation&fontSize=40&fontColor=58a6ff&fontAlignY=40&desc=QA%20Automation%20Framework%20%7C%20145%20Tests%20%7C%20Allure%20%2B%20CI%2FCD&descAlignY=60&descColor=8b949e" width="100%"/>
+<img src="https://capsule-render.vercel.app/api?type=waving&color=0:0d1117,50:161b22,100:1f2937&height=200&section=header&text=Cypress%20E2E%20Automation&fontSize=40&fontColor=58a6ff&fontAlignY=40&desc=QA%20Automation%20Suite%20%7C%20146%20Tests%20%7C%20Allure%20%2B%20CI%2FCD&descAlignY=60&descColor=8b949e" width="100%"/>
 
 </div>
 
